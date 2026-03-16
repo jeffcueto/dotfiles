@@ -22,9 +22,9 @@ alias m='cd $HOME/Miunidad/'
 # Set up fzf key bindings and fuzzy completion
 eval "$(fzf --bash)"
 
-export PATH=/usr/local/texlive/2025/bin/x86_64-linux:$PATH
-export MANPATH=/usr/local/texlive/2025/texmf-dist/doc/man
-export INFOPATH=/usr/local/texlive/2025/texmf-dist/doc/info
+export PATH="/usr/local/texlive/2026/bin/x86_64-linux:$PATH"
+export MANPATH=/usr/local/texlive/2026/texmf-dist/doc/man
+export INFOPATH=/usr/local/texlive/2026/texmf-dist/doc/info
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

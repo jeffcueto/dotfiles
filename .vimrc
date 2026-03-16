@@ -243,48 +243,49 @@ vmap <leader>t :!pandoc -f csv -t markdown<CR>
 source ~/.vim/config/autoclose.vim
 " The escript above is from https://medium.com/@rossijonas
 
+"-- Search file by name ---"
 " Configure FZF to display preview on the right (you can use: down / up / left / right)
-let g:fzf_layout = { 'down': '60%' }
+" let g:fzf_layout = { 'down': '60%' }
+" - Popup window (center of the screen)
+" let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6 } }
+
+
 let $FZF_DEFAULT_OPTS = '--preview="bat --color=always --theme=base16-256 {}" --preview-window=right:50%:wrap'
 "let $FZF_DEFAULT_OPTS = '--layout=default --preview="bat --color=always --theme=base16-256 {}" --preview-window=up:50%:wrap'
 "calling FZF
-nnoremap <silent> <leader>f :FZF<CR>
+nnoremap <silent> <leader>r :FZF!<CR>
 
-"-----"
+"----- full ripgrep on vim ---"
+if executable('rg')
+    " Use rg over grep
+    set grepprg=rg\ --vimgrep\ --smart-case
+    set grepformat=%f:%l:%c:%m
+endif
 
+"-- to search a file content inside ----"
+" 1. A custom sink to safely parse ripgrep output and use 'tabedit'
+function! s:tabedit_rg_sink(line)
+  " Extract filename, line number, and column using regex
+  let l:match = matchlist(a:line, '^\(.\{-}\):\(\d\+\):\(\d\+\):')
 
-""command! LS call fzf#run(fzf#wrap({'source': 'rg --column --line-number --no-heading --color=always --smart-case lazy_static'}))
-
-""command! Rg call fzf#run({'source': 'rg --column --line-number --smart-case lazy_stati', 'sink': 'e'})
-
-function! RipgrepFzf(query)
-  let command_fmt = 'rg --column --line-number --no-heading --color=always --smart-case %s'
-  let initial_command = printf(command_fmt, shellescape(a:query))
-  let reload_command = printf(command_fmt, '{q}')
-
-  call fzf#run({
-        \ 'source': initial_command,
-        \ 'sink': function('s:open_file_at_line_tabedit'),
-        \ 'options': [
-        \   '--ansi',
-        \   '--delimiter', ':',
-        \   '--preview', "bat --style=numbers --color=always {1} --highlight-line {2}",
-        \   '--preview-window', 'up:60%',
-        \   '--phony',
-        \   '--query', a:query,
-        \   '--bind', 'change:reload:'.reload_command
-        \ ]
-        \ })
-endfunction
-
-function! s:open_file_at_line_tabedit(selected)
-  let parts = split(a:selected, ':')
-  if len(parts) >= 2
-    execute 'tabedit +' . parts[1] . ' ' . parts[0]
-  else
-    execute 'tabedit ' . a:selected
+  if len(l:match) > 0
+    " Open in a new tab (as you requested)
+    execute 'tabedit ' . fnameescape(l:match[1])
+    " Jump exactly to the line and column
+    call cursor(str2nr(l:match[2]), str2nr(l:match[3]))
+    " Center the cursor on screen
+    normal! zz
   endif
 endfunction
 
-command! -nargs=+ Rg call RipgrepFzf(<q-args>)
+" 2. The Native FZF command WITH PREVIEW
+command! FzfText call fzf#run({
+  \ 'source':  'rg --column --line-number --no-heading --color=always --smart-case "^"',
+  \ 'sink':    function('s:tabedit_rg_sink'),
+  \ 'options': '--ansi --delimiter : --nth 4.. ' .
+  \            '--preview "bat --color=always --style=numbers --highlight-line {2} {1} 2>/dev/null || cat {1}" ' .
+  \            '--preview-window "right:50%:+{2}-/2"'
+  \ })
 
+" 3. Map it to your preferred shortcut
+nnoremap <silent> <leader>f :FzfText<CR>
