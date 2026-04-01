@@ -289,3 +289,4 @@ command! FzfText call fzf#run({
 
 " 3. Map it to your preferred shortcut
 nnoremap <silent> <leader>f :FzfText<CR>
+
