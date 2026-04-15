@@ -1,5 +1,16 @@
 " for syntaxis
 syn on
+set termguicolors
+"the next are for themes:
+""set background=dark
+""colorscheme gruvbox
+"To markdown examples codes:"
+"let g:markdown_fenced_languages = ['bash=sh', 'python', 'javascript', 'html', 'vim', 'json', 'java']
+let g:markdown_fenced_languages = [
+  \ 'html', 'python', 'bash=sh', 'javascript', 'js=javascript',
+  \ 'json', 'yaml', 'vim', 'lua', 'java', 'c++=cpp', 'docker=dockerfile', 
+  \ 'ts=typescript', 'shell=sh', 'css', 'py=python', 'sshconfig'
+  \ ]
 
 " This is for YoucompletMe:
 set encoding=utf-8
