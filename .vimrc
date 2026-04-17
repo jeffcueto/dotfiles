@@ -7,9 +7,9 @@ set termguicolors
 "To markdown examples codes:"
 "let g:markdown_fenced_languages = ['bash=sh', 'python', 'javascript', 'html', 'vim', 'json', 'java']
 let g:markdown_fenced_languages = [
-  \ 'html', 'python', 'bash=sh', 'javascript', 'js=javascript',
+  \ 'html', 'python', 'bash=sh', 'javascript', 'js=javascript', 'lynx', 
   \ 'json', 'yaml', 'vim', 'lua', 'java', 'c++=cpp', 'docker=dockerfile', 
-  \ 'ts=typescript', 'shell=sh', 'css', 'py=python', 'sshconfig'
+  \ 'ts=typescript', 'shell=sh', 'css', 'py=python', 'sshconfig', 'lss'
   \ ]
 
 " This is for YoucompletMe:
