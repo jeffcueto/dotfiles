@@ -7,9 +7,9 @@ set termguicolors
 "To markdown examples codes:"
 "let g:markdown_fenced_languages = ['bash=sh', 'python', 'javascript', 'html', 'vim', 'json', 'java']
 let g:markdown_fenced_languages = [
-  \ 'html', 'python', 'bash=sh', 'javascript', 'js=javascript', 'lynx', 
+  \ 'html', 'python', 'bash=sh', 'javascript', 'js=javascript', 'lynx', 'tex',
   \ 'json', 'yaml', 'vim', 'lua', 'java', 'c++=cpp', 'docker=dockerfile', 
-  \ 'ts=typescript', 'shell=sh', 'css', 'py=python', 'sshconfig', 'lss'
+  \ 'ts=typescript', 'shell=sh', 'css', 'py=python', 'sshconfig', 'lss' 
   \ ]
 
 " This is for YoucompletMe:
@@ -61,6 +61,23 @@ syntax enable
 
 " This is for Emmet lets test
 let g:user_emmet_leader_key=','
+"Emmet: add meta tag for responsiveness"
+let g:user_emmet_settings = {
+\  'variables': {'lang': 'en'},
+\  'html': {
+\    'snippets': {
+\      'html:5': "<!DOCTYPE html>\n"
+\              ."<html lang=\"${lang}\">\n"
+\              ."<head>\n"
+\              ."\t<meta charset=\"${charset}\">\n"
+\              ."\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+\              ."\t<title></title>\n"
+\              ."</head>\n"
+\              ."<body>\n\t${child}|\n</body>\n"
+\              ."</html>",
+\    },
+\  },
+\}
 
 
 " autosave without plugin
@@ -102,23 +119,70 @@ endfunction
 cmap <F5> :call Lanzar ()<CR> 
 
 "to  Read! documents Markdown and html
-function! Leerdocs()
+" First helper funtion:
+function! GetFirstHtmlComment()
+  " Loop through the first 50 lines
+  for l:line in getline(1, 50)
+    if l:line =~ '<!--'
+      return l:line " Immediately return the comment
+    endif
+  endfor
+  
+  return "" " Return an empty string if no comment is found
+endfunction
+
+"Now the function to read or edit html with local documentation like local
+"wiki
+function! Opendocs()
   if &filetype ==# 'html'
-  let l:first_com = getline(26)
-    "Has to be document html
-    if l:first_com =~ 'purpose: doc'
-      :silent !cat % > ~/.config/jf/htmls/index.html
-      execute ':!nohup read_html > /dev/null 2>&1 &'
+    
+    " Call the helper function here!
+    let l:first_com = GetFirstHtmlComment()
+
+    " Has to be document html
+    if l:first_com =~ 'purpose:\s*doc'
+      :silent !cat % > ~/.local/share/docu/inject.html
+      :tab term livereload
+      :call popup_notification("Documentation HTML file processed", #{ line: 5, col: 10, highlight: 'WildMenu', } )
       :redr!
     else
       :call popup_notification("HTML file purpose is not for read !", #{ line: 5, col: 10, highlight: 'ErrorMsg', } )
     endif
+
   elseif &filetype ==# 'markdown'
     tab term okular %
   endif
 endfunction
 
-cmap <C-o> :call Leerdocs ()<CR> 
+cmap <C-o> :call Opendocs ()<CR> 
+""cmap <C-e> : call Edithtml ()<CR> 
+
+"Function autogroup for html
+function! SetAutocmdGroup()
+  " Check if the file is an HTML file
+  if &filetype ==# 'html'
+    let l:first_com = GetFirstHtmlComment()
+    " Determine the purpose based on the first line
+    if l:first_com =~ 'purpose: doc'
+      " Enable documentation autocmd group
+      augroup doc_website
+        autocmd!
+        autocmd BufWritePost <buffer> :silent !cat % > ~/.local/share/docu/inject.html
+      augroup END
+      :call popup_notification("Documentation HTML autocmd set", #{ line: 5, col: 10, highlight: 'WildMenu', } )
+    else
+      :call popup_notification("This HTML is not for Documentation!", #{ line: 5, col: 10, highlight: 'ErrorMsg', } )
+    endif
+  endif
+endfunction
+
+" call SetAutocmdGroup
+augroup set_autocmd_group_on_open
+  autocmd!
+  autocmd BufReadPost *.html call SetAutocmdGroup()
+augroup END
+
+
 " We are going to add the next at the end of the line if we want dont looks
 " we want to use lua and when try lua we have som problems with io,  
 " :redr!<CR>
@@ -138,70 +202,6 @@ endfunction
 " Next if for upload files to server using sftp"
 cmap <C-u> execute 'term sftpup.sh %'<CR>
 
-
-" the next if for docs html or dev website using if to read purpose
-function! Edithtml()
-  " Read the first line of the current file
-  let l:first_com = getline(26)
-  " Get the current path for site develop
-  let current_path = expand('%:p:h')
-
-  " Check if the file is an HTML file
-  if &filetype ==# 'html'
-    " Determine the purpose based on the first line
-    if l:first_com =~ 'purpose: doc'
-      " Handle documentation HTML files
-      :silent !cat % > ~/.config/jf/html/index.html
-      :tab term livereload
-      :call popup_notification("Documentation HTML file processed", #{ line: 5, col: 10, highlight: 'WildMenu', } )
-    elseif l:first_com =~ 'purpose: site'
-      " Handle site development HTML files
-      execute ':tab term livesite ' . current_path
-      :call popup_notification("Site development HTML file processed", #{ line: 5, col: 10, highlight: 'WildMenu', } )
-    else
-      " Handle files without a specific purpose
-      :call popup_notification("HTML file purpose not specified!", #{ line: 5, col: 10, highlight: 'ErrorMsg', } )
-    endif
-  else
-    " Handle non-HTML files
-    :call popup_notification("This is not an HTML file!", #{ line: 5, col: 10, highlight: 'ErrorMsg', } )
-  endif
-endfunction
-
-cmap <C-e> : call Edithtml ()<CR> 
-
-
-"Function autogroup for html
-function! SetAutocmdGroup()
-  " Read the first line of the current file
-  let l:first_line = getline(26)
-
-  " Check if the file is an HTML file
-  if &filetype ==# 'html'
-    " Determine the purpose based on the first line
-    if l:first_line =~ 'purpose: doc'
-      " Enable documentation autocmd group
-      augroup doc_website
-        autocmd!
-        autocmd BufWritePost <buffer> :silent !cat % > ~/.config/jf/html/index.html
-      augroup END
-      :call popup_notification("Documentation HTML autocmd set", #{ line: 5, col: 10, highlight: 'WildMenu', } )
-    elseif l:first_line =~ 'purpose: site'
-      " Notification remember you are in site html 
-      :call popup_notification("Site development HTML is not for documentation!", #{ line: 5, col: 10, highlight: 'WildMenu', } )
-    else
-      :call popup_notification("HTML file purpose not specified!", #{ line: 5, col: 10, highlight: 'ErrorMsg', } )
-    endif
-  else
-    :call popup_notification("This is not an HTML file!", #{ line: 5, col: 10, highlight: 'ErrorMsg', } )
-  endif
-endfunction
-
-" call SetAutocmdGroup
-augroup set_autocmd_group_on_open
-  autocmd!
-  autocmd BufReadPost *.html call SetAutocmdGroup()
-augroup END
 
 " Comment multi lines and title coments and delete comments
 
@@ -230,8 +230,9 @@ augroup comenta
 augroup END
 
 "Copy to Clipboard
-"vmap <leader>c :"+y this was the veryold way maybe still can be use in macos 
-vmap <leader>c :w !wl-copy<CR>
+"vmap <leader>c :"+y this was the veryold way maybe still can be use in macos
+"but for wayland on linux we create the next: 
+vnoremap <leader>c y:call system("wl-copy", @")<CR>
 "if you want no confirmation type doble like this: "<CR><CR>
 "
 " Calling pandoc to convert Markdown to html  for that we use a bash script
