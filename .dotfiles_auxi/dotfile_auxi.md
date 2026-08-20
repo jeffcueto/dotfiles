@@ -13,7 +13,7 @@ mkdir -p ~/.config/bash
 touch ~/.config/bash/{aliases.sh,functions.sh,env.sh,history.sh}
 ```
 
-I'm going to create a bash script called  `sourcing_bashrc.sh`  in `$HOME/.dotfiles_auxi/` with this:    
+3. **To evoid to write** the sources to those files above form my bashrc. I'm going to create a bash script called  `sourcing_bashrc.sh`  in `$HOME/.dotfiles_auxi/` with this:    
 ```bash
 #!/usr/bin/env bash
 
@@ -34,4 +34,10 @@ EOF
 else
     echo "Configurations already exist in $BASHRC. Skipping."
 fi
+```
+4. **Execute the bash script**: To do that you can just copy the content above and execute. or usr the curl like this:
+```bash
+# for link codeberg
+curl -L https://codeberg.org/jeffcueto/dotfiles/raw/branch/main/.dotfiles_auxi/sourcing_bashrc.sh | bash
+# for url github just change the link
 ```
