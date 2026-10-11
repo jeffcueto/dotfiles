@@ -8,6 +8,16 @@ Here is the structure of my "dot files" in my home directory. At the moment we h
 
 ## About the defualt bashrc
 
-The default **bashrc**. In some ditros like **fedora** it  creates  `# User specific environment` and `# User specific environment`, we are going to comment it out those parts on the `.bashrc` because we already have ower way to achive that in this repo. So **before clone this repo** open your bashrc with your editor and look for those parts and comment it out.
+The default **.bashrc** file. In some distributions, such as 
+**Fedora**, it contains sections like `# User specific 
+environment` and (a second instance of) `# User specific 
+environment`. Since we already have our own way to achieve 
+this in this repository, please comment out these specific 
+sections in your local `.bashrc` *before* cloning this 
+repository.
 
-To implement "Custom modular bash config" i have a [Bash Dedicated guide](.dotfiles_auxi/dotfile_auxi.md) to add faster.
+To implement the "Custom modular bash config," please refer 
+to my [Bash Dedicated guide](.dotfiles_auxi/dotfile_auxi.md) 
+for faster setup instructions.
+
+
